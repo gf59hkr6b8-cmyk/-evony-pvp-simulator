@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Evony PvP Simulator Pro Max</title>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<style>
+:root{
+  --bg:#07111f;--card:#0d1a2b;--card2:#10233a;--line:#263b55;
+  --text:#eef5ff;--muted:#9db0c9;--blue:#42b5f5;--green:#58d68d;
+  --yellow:#ffca63;--red:#ff7474;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,#06101d,#0a1422 48%,#07101c);
+}
+button,input,select,textarea{font:inherit}
+button{touch-action:manipulation}
+header{
+  position:sticky;top:0;z-index:30;
+  padding:max(12px,env(safe-area-inset-top)) 14px 12px;
+  background:rgba(6,16,29,.94);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+header h1{font-size:18px;margin:0}
+header p{font-size:11px;color:var(--muted);margin:4px 0 0}
+main{
+  max-width:1200px;margin:auto;padding:12px;
+  padding-bottom:max(36px,env(safe-area-inset-bottom));
+}
+.notice{
+  padding:10px 11px;border-radius:12px;background:#0a2034;
+  border:1px solid #244866;color:#d9edff;font-size:12px;line-height:1.45;
+}
+.tabs{
+  display:flex;gap:6px;overflow:auto;padding:12px 0 6px;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab,button,.fileButton{
+  border:1px solid #315170;background:#16304d;color:#fff;
+  border-radius:11px;padding:10px 12px;font-weight:700;min-height:42px;
+  cursor:pointer;white-space:nowrap;
+}
+.tab.active,.primary{background:#0f6da8;border-color:#278fd0}
+.success{background:#17663e;border-color:#2a9d62}
+.danger{background:#612b35;border-color:#94404f}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+.card{
+  background:rgba(13,26,43,.97);border:1px solid var(--line);
+  border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+.card h2{font-size:16px;margin:0 0 10px}
+.card h3{font-size:13px;margin:14px 0 8px}
+.small{font-size:11px;color:var(--muted);line-height:1.45}
+.formGrid{display:grid;grid-template-columns:1fr;gap:9px}
+label{font-size:12px;color:var(--muted)}
+input,select,textarea{
+  width:100%;margin-top:5px;padding:10px;min-height:42px;
+  border:1px solid #2c435d;border-radius:10px;background:#091523;color:white;
+}
+textarea{min-height:110px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fileButton{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.fileButton input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop{
+  border:1.5px dashed #3a6286;border-radius:14px;padding:18px;
+  text-align:center;background:#091827;color:var(--muted);margin-top:10px;
+}
+.drop.drag{border-color:var(--blue);background:#0b2238}
+.progress{
+  height:8px;border-radius:99px;overflow:hidden;background:#06101d;margin:10px 0;
+}
+.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#298dcc,#58d68d)}
+.status{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--yellow)}
+.dot.ok{background:var(--green)}.dot.bad{background:var(--red)}
+.previews{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px;
+}
+.preview{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#050b12}
+.preview img{width:100%;height:150px;object-fit:contain;display:block}
+.preview div{padding:7px;font-size:10px;color:var(--muted);word-break:break-word}
+details{border:1px solid #233951;border-radius:10px;padding:8px;margin-top:8px}
+summary{font-size:12px;font-weight:700;cursor:pointer}
+pre{
+  white-space:pre-wrap;word-break:break-word;background:#050b12;
+  border:1px solid #22364d;border-radius:9px;padding:9px;max-height:260px;overflow:auto;
+  font-size:10px;color:#cbd7e4;
+}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kpi{background:#091827;border:1px solid #203b55;border-radius:11px;padding:9px}
+.kpi span{font-size:10px;color:var(--muted)}
+.kpi b{display:block;font-size:17px;margin-top:3px}
+.tableWrap{
+  overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;
+}
+table{border-collapse:collapse;min-width:870px;width:100%;font-size:11px}
+th,td{border-bottom:1px solid #1d3047;border-right:1px solid #1d3047;padding:5px;text-align:center}
+th{position:sticky;top:0;background:#10233a;z-index:3}
+td:first-child,th:first-child{
+  position:sticky;left:0;background:#10233a;z-index:4;text-align:left;font-weight:700;
+}
+.troopInput{min-width:76px;padding:7px;margin:0;text-align:right}
+.buffGrid{
+  display:grid;grid-template-columns:84px repeat(3,minmax(0,1fr));gap:6px;align-items:center;
+}
+.buffGrid .head{font-size:10px;color:var(--muted);text-align:center}
+.buffGrid .type{font-size:11px;font-weight:700}
+.buffGrid input{margin:0;padding:8px;text-align:center}
+.result{
+  border-left:3px solid var(--blue);background:#091a2a;border-radius:10px;
+  padding:11px 12px;margin:8px 0;
+}
+.result strong{font-size:15px}
+.pill{
+  display:inline-block;border:1px solid #315170;border-radius:999px;
+  padding:3px 7px;font-size:10px;color:#c8d8e9;margin:2px;
+}
+.layers{font-size:11px;line-height:1.5;color:#d6e2ef;margin:7px 0}
+.full{width:100%;margin-top:10px}
+.topGap{margin-top:12px}
+footer{text-align:center;color:var(--muted);font-size:10px;padding:22px 4px 10px}
+@media(min-width:640px){
+  .formGrid{grid-template-columns:repeat(2,1fr)}
+  .previews{grid-template-columns:repeat(3,1fr)}
+  .kpis{grid-template-columns:repeat(5,1fr)}
+}
+@media(min-width:900px){
+  .grid.two{grid-template-columns:1fr 1fr}
+  main{padding:18px}
+  .previews{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>Evony PvP Simulator Pro Max</h1>
+  <p>Mobile scout reader • T1–T17 • Solo/Rally • iPhone + Android</p>
+</header>
+
+<main>
+  <div class="notice">
+    <strong>Planning model:</strong> Evony's exact server combat formula is not public. OCR is reviewed before it changes your setup, and all recommendations are modeled estimates.
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="import">Import</button>
+    <button class="tab" data-tab="verify">Verify</button>
+    <button class="tab" data-tab="defender">Defender</button>
+    <button class="tab" data-tab="attacker">Attacker</button>
+    <button class="tab" data-tab="simulate">Simulate</button>
+    <button class="tab" data-tab="share">Share</button>
+  </nav>
+
+  <section id="import" class="panel active">
+    <div class="grid two">
+      <div class="card">
+        <h2>Upload scout / battle report</h2>
+        <div class="row">
+          <label class="fileButton primary">
+            Choose photos / PDF
+            <input id="fileInput" type="file" accept="image/*,application/pdf,.pdf" multiple>
+          </label>
+          <label class="fileButton">
+            Take photo
+            <input id="cameraInput" type="file" accept="image/*" capture="environment">
+          </label>
+        </div>
+        <div id="dropZone" class="drop">Drag files here on computer, or use the buttons above.</div>
+        <div class="progress"><span id="progressBar"></span></div>
+        <div class="status"><span id="statusDot" class="dot"></span><span id="statusText">Ready</span></div>
+        <div id="previewGrid" class="previews"></div>
+      </div>
+
+      <div class="card">
+        <h2>Report reader</h2>
+        <div class="formGrid">
+          <label>Page type
+            <select id="pageType">
+              <option value="auto">Auto detect</option>
+              <option value="troops">Troop / scout page</option>
+              <option value="buff">Buff / debuff page</option>
+              <option value="reinforcement">Reinforcement page</option>
+            </select>
+          </label>
+          <label>Enemy side on buff screenshot
+            <select id="enemySide">
+              <option value="right">Right side</option>
+              <option value="left">Left side</option>
+            </select>
+          </label>
+        </div>
+        <div class="row topGap">
+          <button id="runOcr" class="primary">Read reports</button>
+          <button id="clearImports">Clear uploads</button>
+        </div>
+        <details><summary>Raw OCR text</summary><pre id="rawText">No OCR yet.</pre></details>
+        <details><summary>Detected values</summary><pre id="detectedText">Nothing detected yet.</pre></details>
+        <div class="notice topGap">
+          If OCR fails on a phone, the simulator still works. Enter the scout values manually in Defender.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="verify" class="panel">
+    <div class="grid two">
+      <div class="card">
+        <h2>Report fingerprint</h2>
+        <div class="kpis">
+          <div class="kpi"><span>Total</span><b id="kTotal">0</b></div>
+          <div class="kpi"><span>Ground</span><b id="kGround">0</b></div>
+          <div class="kpi"><span>Ranged</span><b id="kRanged">0</b></div>
+          <div class="kpi"><span>Mounted</span><b id="kMounted">0</b></div>
+          <div class="kpi"><span>Siege</span><b id="kSiege">0</b></div>
+        </div>
+        <div class="notice topGap">Fingerprint: <strong id="fingerprint">—</strong></div>
+        <div id="changeNote" class="notice topGap">No previous applied report to compare.</div>
+      </div>
+
+      <div class="card">
+        <h2>Review before applying</h2>
+        <p class="small">Detected values stay staged until you press Apply.</p>
+        <div id="stagingSummary" class="notice">No staged values.</div>
+        <div class="row topGap">
+          <button id="applyDetected" class="success">Apply staged values</button>
+          <button id="discardDetected">Discard</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="defender" class="panel">
+    <div class="card">
+      <h2>Defender troops — T1 to T17</h2>
+      <p class="small">On phones, swipe the table left/right.</p>
+      <div id="defenderTroops" class="tableWrap"></div>
+    </div>
+
+    <div class="grid two topGap">
+      <div class="card">
+        <h2>Reinforcements</h2>
+        <div id="reinforcementTroops" class="tableWrap"></div>
+      </div>
+      <div class="card">
+        <h2>Enemy buffs</h2>
+        <div id="enemyBuffGrid"></div>
+        <h3>Enemy debuffs</h3>
+        <div id="enemyDebuffGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="attacker" class="panel">
+    <div class="grid two">
+      <div class="card">
+        <h2>Your attack setup</h2>
+        <div class="formGrid">
+          <label>Attack type
+            <select id="attackType"><option>Solo</option><option>Rally</option></select>
+          </label>
+          <label>March / rally capacity
+            <input id="marchSize" type="number" inputmode="numeric" min="1" value="2500000">
+          </label>
+          <label>Top troop tier
+            <select id="topTier"></select>
+          </label>
+          <label>Rally participants
+            <input id="rallyMembers" type="number" inputmode="numeric" min="1" max="20" value="1">
+          </label>
+          <label>Main general
+            <input id="mainGeneral" placeholder="General name">
+          </label>
+          <label>Assistant general
+            <input id="assistantGeneral" placeholder="Assistant name">
+          </label>
+        </div>
+        <div class="notice topGap">
+          General names are saved as metadata. The combat model uses the buff/debuff values you enter instead of inventing stats from a name.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Your buffs</h2>
+        <div id="myBuffGrid"></div>
+        <h3>Your debuffs</h3>
+        <div id="myDebuffGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulate" class="panel">
+    <div class="grid two">
+      <div class="card">
+        <h2>Simulation options</h2>
+        <div class="formGrid">
+          <label>Goal
+            <select id="goal">
+              <option value="trade">Best modeled trade</option>
+              <option value="damage">Maximum damage</option>
+              <option value="safe">Lower-risk hit</option>
+              <option value="siege">Siege pressure</option>
+            </select>
+          </label>
+          <label>Layer preset
+            <select id="layerPreset">
+              <option value="thin">Thin layers</option>
+              <option value="balanced" selected>Balanced</option>
+              <option value="heavy">Heavy layers</option>
+            </select>
+          </label>
+        </div>
+        <button id="simulateBtn" class="primary full">Run PvP model</button>
+      </div>
+
+      <div class="card">
+        <h2>Defense read</h2>
+        <div id="defenseRead" class="notice">Run the model after entering or importing a defense.</div>
+        <div id="whyChanged" class="notice topGap">No previous simulation to compare.</div>
+      </div>
+    </div>
+
+    <div class="card topGap">
+      <h2>Recommended attacks</h2>
+      <div id="results"><p class="small">No simulation yet.</p></div>
+    </div>
+  </section>
+
+  <section id="share" class="panel">
+    <div class="grid two">
+      <div class="card">
+        <h2>Save on this phone</h2>
+        <div class="row">
+          <button id="saveLocal" class="success">Save</button>
+          <button id="resetAll" class="danger">Reset all</button>
+        </div>
+        <p class="small">The setup is stored in this browser on this phone.</p>
+      </div>
+
+      <div class="card">
+        <h2>Share setup with another phone</h2>
+        <div class="row">
+          <button id="makeShare">Create share code</button>
+          <button id="copyShare">Copy code</button>
+        </div>
+        <textarea id="shareCode" placeholder="Share code appears here. Paste another code here to load it."></textarea>
+        <button id="loadShare" class="full">Load share code</button>
+      </div>
+    </div>
+
+    <div class="card topGap">
+      <h2>Add to Home Screen</h2>
+      <p class="small"><strong>iPhone:</strong> open the hosted page in Safari → Share → Add to Home Screen.</p>
+      <p class="small"><strong>Android:</strong> open in Chrome → menu → Add to Home screen.</p>
+    </div>
+  </section>
+
+  <footer>Evony PvP Simulator Pro Max • Mobile build • Modeled planning estimates</footer>
+</main>
+
+<script>
+'use strict';
+
+const TYPES=['Ground','Ranged','Mounted','Siege'];
+const STATS=['Attack','Defense','HP'];
+
+function newTroops(){return Object.fromEntries(TYPES.map(t=>[t,Array(18).fill(0)]));}
+function newBuffs(){return Object.fromEntries(TYPES.map(t=>[t,{Attack:0,Defense:0,HP:0}]));}
+
+const state={
+  defender:newTroops(),
+  reinforcement:newTroops(),
+  enemyBuff:newBuffs(),
+  enemyDebuff:newBuffs(),
+  myBuff:newBuffs(),
+  myDebuff:newBuffs(),
+  files:[],
+  pages:[],
+  staged:{troops:[],reinforcements:[],buffs:[],raw:[]},
+  previousAppliedFingerprint:null,
+  previousSimulationFingerprint:null
+};
+
+const $=id=>document.getElementById(id);
+
+function parseNum(v){
+  const s=String(v??'').replace(/,/g,'').trim();
+  const m=s.match(/(-?[\d.]+)\s*([kmb])?/i);
+  if(!m)return 0;
+  let n=parseFloat(m[1])||0;
+  const u=(m[2]||'').toLowerCase();
+  if(u==='k')n*=1e3;if(u==='m')n*=1e6;if(u==='b')n*=1e9;
+  return Math.round(n);
+}
+function fmt(n){
+  return new Intl.NumberFormat('en-US',{
+    notation:n>=1e6?'compact':'standard',maximumFractionDigits:1
+  }).format(n||0);
+}
+function status(text,kind=''){
+  $('statusText').textContent=text;
+  $('statusDot').className='dot '+kind;
+}
+function progress(n){$('progressBar').style.width=Math.max(0,Math.min(100,n))+'%';}
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===btn.dataset.tab));
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+function openTab(id){document.querySelector('.tab[data-tab="'+id+'"]').click();}
+
+function buildTroopTable(target,key){
+  let h='<table><thead><tr><th>Type</th>';
+  for(let t=1;t<=17;t++)h+='<th>T'+t+'</th>';
+  h+='</tr></thead><tbody>';
+  TYPES.forEach(type=>{
+    h+='<tr><td>'+type+'</td>';
+    for(let t=1;t<=17;t++){
+      h+='<td><input class="troopInput" inputmode="numeric" data-key="'+key+'" data-type="'+type+'" data-tier="'+t+'" value="'+(state[key][type][t]||'')+'"></td>';
+    }
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  $(target).innerHTML=h;
+  $(target).querySelectorAll('.troopInput').forEach(i=>{
+    i.addEventListener('change',()=>{
+      state[i.dataset.key][i.dataset.type][+i.dataset.tier]=parseNum(i.value);
+      i.value=state[i.dataset.key][i.dataset.type][+i.dataset.tier]||'';
+      refreshFingerprint();save();
+    });
+  });
+}
+
+function buildBuffGrid(target,key){
+  let h='<div class="buffGrid"><div></div>';
+  STATS.forEach(s=>h+='<div class="head">'+s+' %</div>');
+  TYPES.forEach(type=>{
+    h+='<div class="type">'+type+'</div>';
+    STATS.forEach(stat=>{
+      h+='<input type="number" step="0.1" data-key="'+key+'" data-type="'+type+'" data-stat="'+stat+'" value="'+state[key][type][stat]+'">';
+    });
+  });
+  h+='</div>';
+  $(target).innerHTML=h;
+  $(target).querySelectorAll('input').forEach(i=>{
+    i.addEventListener('change',()=>{
+      state[i.dataset.key][i.dataset.type][i.dataset.stat]=parseFloat(i.value)||0;
+      save();
+    });
+  });
+}
+
+function rebuild(){
+  buildTroopTable('defenderTroops','defender');
+  buildTroopTable('reinforcementTroops','reinforcement');
+  buildBuffGrid('enemyBuffGrid','enemyBuff');
+  buildBuffGrid('enemyDebuffGrid','enemyDebuff');
+  buildBuffGrid('myBuffGrid','myBuff');
+  buildBuffGrid('myDebuffGrid','myDebuff');
+}
+
+function buildTiers(){
+  $('topTier').innerHTML='';
+  for(let t=17;t>=1;t--){
+    const o=document.createElement('option');
+    o.value=t;o.textContent='T'+t;if(t===16)o.selected=true;
+    $('topTier').appendChild(o);
+  }
+}
+buildTiers();
+
+function totals(matrix){
+  const out={Total:0,Ground:0,Ranged:0,Mounted:0,Siege:0};
+  TYPES.forEach(type=>{
+    for(let t=1;t<=17;t++){const n=matrix[type][t]||0;out[type]+=n;out.Total+=n;}
+  });
+  return out;
+}
+function combined(){
+  const out=newTroops();
+  TYPES.forEach(type=>{for(let t=1;t<=17;t++)out[type][t]=(state.defender[type][t]||0)+(state.reinforcement[type][t]||0);});
+  return out;
+}
+function hash(s){
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return ('00000000'+(h>>>0).toString(16)).slice(-8).toUpperCase();
+}
+function fingerprint(){
+  return hash(JSON.stringify({
+    d:state.defender,r:state.reinforcement,b:state.enemyBuff,db:state.enemyDebuff
+  }));
+}
+function refreshFingerprint(){
+  const t=totals(combined());
+  $('kTotal').textContent=fmt(t.Total);$('kGround').textContent=fmt(t.Ground);
+  $('kRanged').textContent=fmt(t.Ranged);$('kMounted').textContent=fmt(t.Mounted);
+  $('kSiege').textContent=fmt(t.Siege);
+  const fp=fingerprint();$('fingerprint').textContent=fp;
+  if(!state.previousAppliedFingerprint)$('changeNote').textContent='No previous applied report to compare.';
+  else if(state.previousAppliedFingerprint===fp)$('changeNote').textContent='Current data matches the previous applied report.';
+  else $('changeNote').textContent='Report changed: '+state.previousAppliedFingerprint+' → '+fp+'. Results will be recalculated.';
+}
+
+function troopType(line){
+  const s=line.toLowerCase();
+  if(/ground|infantry|warrior|swordsman|sword|guard|spearman|pikeman|hoplite|samurai/.test(s))return'Ground';
+  if(/ranged|archer|bow|crossbow|marksman|longbow|musketeer|shooter/.test(s))return'Ranged';
+  if(/mounted|cavalry|cavalier|horse|knight|lancer|cataphract|hussar|rider/.test(s))return'Mounted';
+  if(/siege|catapult|trebuchet|onager|ballista|cannon|mortar|scorpion|helepolis|ram/.test(s))return'Siege';
+  return null;
+}
+function dedupe(items){
+  const m={};
+  items.forEach(x=>{const k=x.type+'-'+x.tier;if(!m[k]||x.count>m[k].count)m[k]=x;});
+  return Object.values(m);
+}
+function parseTroopText(text){
+  const out=[];
+  text.split(/\n/).forEach((line,idx)=>{
+    const type=troopType(line);
+    const tm=line.match(/\b(?:t|tier)\s*[-:]?\s*(1[0-7]|[1-9])\b/i);
+    if(!type||!tm)return;
+    const tier=+tm[1];
+    const cleaned=line.replace(/(?:t|tier)\s*[-:]?\s*(1[0-7]|[1-9])/ig,' ').replace(/\d+(?:\.\d+)?\s*%/g,' ');
+    const vals=[...cleaned.matchAll(/\b\d[\d,]*(?:\.\d+)?\s*[KMB]?\b/ig)].map(m=>parseNum(m[0])).filter(n=>n>0);
+    if(vals.length)out.push({type,tier,count:Math.max(...vals),line:idx+1,source:line.trim()});
+  });
+  return dedupe(out);
+}
+function parseBuffText(text){
+  const out=[];let mode='buff';
+  text.split(/\n/).forEach((line,idx)=>{
+    const s=line.toLowerCase();if(s.includes('debuff'))mode='debuff';
+    const type=troopType(line);if(!type)return;
+    const stat=/attack|\batk\b/.test(s)?'Attack':(/defense|defence|\bdef\b/.test(s)?'Defense':(/\bhp\b|health/.test(s)?'HP':null));
+    const vals=[...line.matchAll(/(-?\d+(?:\.\d+)?)\s*%/g)].map(m=>parseFloat(m[1]));
+    if(stat&&vals.length)out.push({mode,type,stat,value:Math.max(...vals),line:idx+1,source:line.trim()});
+  });
+  return out;
+}
+function classify(text){
+  const s=text.toLowerCase();
+  if(/reinforcement|reinforce/.test(s))return'reinforcement';
+  if(/buff|debuff|attack.*%|defense.*%|\bhp.*%/.test(s))return'buff';
+  if(/troop|tier|quantity|ground|ranged|mounted|siege/.test(s))return'troops';
+  return'unknown';
+}
+
+async function imageCanvas(file){
+  const url=URL.createObjectURL(file),img=new Image();img.src=url;await img.decode();
+  let scale=Math.min(2.2,2400/Math.max(img.width,img.height));scale=Math.max(1.2,scale);
+  const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);return c;
+}
+async function pdfCanvases(file){
+  if(!window.pdfjsLib)throw new Error('PDF library did not load.');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const data=await file.arrayBuffer(),pdf=await pdfjsLib.getDocument({data}).promise,out=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p),vp=page.getViewport({scale:1.8}),c=document.createElement('canvas');
+    c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
+    await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;out.push(c);
+  }
+  return out;
+}
+function preview(c,label){
+  const box=document.createElement('div');box.className='preview';
+  const img=document.createElement('img');img.src=c.toDataURL('image/jpeg',.82);
+  const m=document.createElement('div');m.textContent=label;box.append(img,m);$('previewGrid').appendChild(box);
+}
+async function loadFiles(list){
+  const files=[...list];if(!files.length)return;
+  state.files=files;state.pages=[];$('previewGrid').innerHTML='';status('Preparing files…');progress(5);
+  let done=0;
+  for(const f of files){
+    try{
+      if(f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf')){
+        const pages=await pdfCanvases(f);
+        pages.forEach((c,i)=>{const label=f.name+' • page '+(i+1);state.pages.push({canvas:c,label});preview(c,label);});
+      }else if(f.type.startsWith('image/')){
+        const c=await imageCanvas(f);state.pages.push({canvas:c,label:f.name});preview(c,f.name);
+      }
+    }catch(e){console.error(e);status('Could not open '+f.name+': '+e.message,'bad');}
+    done++;progress(5+done/files.length*20);
+  }
+  status(state.pages.length+' page(s) ready','ok');
+}
+
+$('fileInput').addEventListener('change',e=>loadFiles(e.target.files));
+$('cameraInput').addEventListener('change',e=>loadFiles(e.target.files));
+const dz=$('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');loadFiles(e.dataTransfer.files)});
+
+function stagedSummary(){
+  const t=state.staged.troops.length,r=state.staged.reinforcements.length,b=state.staged.buffs.length;
+  $('stagingSummary').textContent=(t||r||b)
+    ? t+' defender layer(s), '+r+' reinforcement layer(s), and '+b+' buff/debuff value(s) staged.'
+    :'No staged values.';
+}
+
+$('runOcr').addEventListener('click',async()=>{
+  if(!state.pages.length){status('Choose photos or a PDF first.','bad');return;}
+  if(!window.Tesseract){status('OCR library did not load. Refresh with internet connected.','bad');return;}
+  $('runOcr').disabled=true;
+  state.staged={troops:[],reinforcements:[],buffs:[],raw:[]};
+  let worker=null;
+  try{
+    status('Starting OCR…');progress(8);
+    worker=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.progress)progress(10+m.progress*70)}});
+    for(let i=0;i<state.pages.length;i++){
+      status('Reading page '+(i+1)+' of '+state.pages.length+'…');
+      const ret=await worker.recognize(state.pages[i].canvas),text=ret.data.text||'';
+      state.staged.raw.push('--- '+state.pages[i].label+' ---\n'+text);
+      const forced=$('pageType').value,kind=forced==='auto'?classify(text):forced;
+      if(kind==='troops')state.staged.troops.push(...parseTroopText(text));
+      else if(kind==='reinforcement')state.staged.reinforcements.push(...parseTroopText(text));
+      else if(kind==='buff')state.staged.buffs.push(...parseBuffText(text));
+      progress(15+(i+1)/state.pages.length*80);
+    }
+    state.staged.troops=dedupe(state.staged.troops);
+    state.staged.reinforcements=dedupe(state.staged.reinforcements);
+    $('rawText').textContent=state.staged.raw.join('\n\n')||'No text found.';
+    $('detectedText').textContent=JSON.stringify(state.staged,null,2);
+    stagedSummary();status('OCR complete — review before applying.','ok');progress(100);openTab('verify');
+  }catch(e){
+    console.error(e);status('OCR failed: '+(e.message||e),'bad');$('rawText').textContent='OCR error:\n'+(e.stack||e);
+  }finally{
+    if(worker){try{await worker.terminate()}catch(e){}}
+    $('runOcr').disabled=false;
+  }
+});
+
+$('clearImports').addEventListener('click',()=>{
+  state.files=[];state.pages=[];state.staged={troops:[],reinforcements:[],buffs:[],raw:[]};
+  $('fileInput').value='';$('cameraInput').value='';$('previewGrid').innerHTML='';
+  $('rawText').textContent='No OCR yet.';$('detectedText').textContent='Nothing detected yet.';
+  stagedSummary();progress(0);status('Ready');
+});
+
+$('discardDetected').addEventListener('click',()=>{
+  state.staged={troops:[],reinforcements:[],buffs:[],raw:[]};stagedSummary();
+});
+$('applyDetected').addEventListener('click',()=>{
+  if(!state.staged.troops.length&&!state.staged.reinforcements.length&&!state.staged.buffs.length)return;
+  state.previousAppliedFingerprint=fingerprint();
+  state.staged.troops.forEach(x=>state.defender[x.type][x.tier]=x.count);
+  state.staged.reinforcements.forEach(x=>state.reinforcement[x.type][x.tier]=x.count);
+  state.staged.buffs.forEach(x=>{
+    const key=x.mode==='debuff'?'enemyDebuff':'enemyBuff';
+    state[key][x.type][x.stat]=x.value;
+  });
+  rebuild();refreshFingerprint();save();openTab('defender');
+});
+
+function tierFactor(t){return Math.pow(1.19,t-1)}
+const COUNTER={
+  Ground:{Ground:1,Ranged:1.35,Mounted:.72,Siege:1},
+  Ranged:{Ground:.78,Ranged:1,Mounted:1.42,Siege:1.08},
+  Mounted:{Ground:1.38,Ranged:.72,Mounted:1,Siege:1.08},
+  Siege:{Ground:1,Ranged:1.18,Mounted:.90,Siege:1.05}
+};
+function effectivePct(buff,debuff){return Math.max(0,buff-Math.min(debuff,buff*.5))}
+function defStrength(type){
+  const c=combined();let weighted=0;
+  for(let t=1;t<=17;t++)weighted+=(c[type][t]||0)*tierFactor(t);
+  const b=state.enemyBuff[type],d=state.myDebuff[type];
+  const a=1+effectivePct(b.Attack,d.Attack)/100,h=1+effectivePct(b.HP,d.HP)/100,f=1+effectivePct(b.Defense,d.Defense)/100;
+  return weighted*Math.sqrt(a*h*f);
+}
+function atkMultiplier(type){
+  const b=state.myBuff[type],d=state.enemyDebuff[type];
+  const a=1+effectivePct(b.Attack,d.Attack)/100,h=1+effectivePct(b.HP,d.HP)/100,f=1+effectivePct(b.Defense,d.Defense)/100;
+  return Math.sqrt(a*h*f);
+}
+function defenseRead(){
+  const c=combined(),t=totals(c);if(!t.Total)return'No defender troops entered';
+  let lm=0,lg=0,ls=0;for(let i=1;i<=4;i++){lm+=c.Mounted[i]||0;lg+=c.Ground[i]||0;ls+=c.Siege[i]||0}
+  if(lm/t.Total>.35)return'T1 / low-tier mounted trap';
+  if(lg/t.Total>.35)return'Low-tier ground-heavy wall';
+  if(ls/t.Total>.25)return'Low-tier siege-heavy defense';
+  return TYPES.map(x=>[x,t[x]]).sort((a,b)=>b[1]-a[1])[0][0]+'-heavy defense';
+}
+function layerPlan(size,top,preset){
+  const layer=preset==='thin'?500:preset==='heavy'?3000:1000,a=Array(18).fill(0);let left=size;
+  for(let t=1;t<top;t++){const n=Math.min(layer,left);a[t]=n;left-=n}
+  const second=Math.max(1,top-1),n=Math.round(Math.max(0,left)*.18);a[second]+=n;left-=n;a[top]+=Math.max(0,left);return a;
+}
+function simFingerprint(){
+  return hash(JSON.stringify({
+    report:fingerprint(),myBuff:state.myBuff,myDebuff:state.myDebuff,
+    type:$('attackType').value,size:$('marchSize').value,top:$('topTier').value,
+    rally:$('rallyMembers').value,goal:$('goal').value,preset:$('layerPreset').value
+  }));
+}
+
+$('simulateBtn').addEventListener('click',()=>{
+  if(!totals(combined()).Total){$('results').innerHTML='<div class="notice">Enter or import defender troops first.</div>';return;}
+  const size=Math.max(1,parseNum($('marchSize').value)),top=+$('topTier').value,preset=$('layerPreset').value;
+  const goal=$('goal').value,type=$('attackType').value,members=Math.max(1,Math.min(20,+$('rallyMembers').value||1));
+  const rallyScale=type==='Rally'?Math.sqrt(members):1;
+  const def=TYPES.map(x=>({type:x,str:defStrength(x)}));
+  const candidates=TYPES.map(atk=>{
+    let pressure=0;def.forEach(d=>pressure+=d.str*COUNTER[atk][d.type]);
+    const gm=goal==='siege'?(atk==='Siege'?1.28:.94):goal==='safe'?(atk==='Ground'?1.1:1):goal==='damage'?(atk==='Ranged'?1.06:1):1;
+    const score=pressure?size*tierFactor(top)*atkMultiplier(atk)*gm*rallyScale/pressure:0;
+    return{type:atk,score,plan:layerPlan(size,top,preset)};
+  }).sort((a,b)=>b.score-a.score);
+
+  const max=candidates[0].score||1;
+  $('results').innerHTML=candidates.map((c,i)=>{
+    const score=Math.round(55+40*c.score/max),layers=[];
+    for(let t=17;t>=1;t--)if(c.plan[t])layers.push('T'+t+' '+fmt(c.plan[t]));
+    return '<div class="result"><strong>#'+(i+1)+' '+c.type+' attack</strong> '+
+      '<span class="pill">modeled '+score+'/95</span> '+
+      '<span class="pill">'+type+(type==='Rally'?' • '+members+' members':'')+'</span>'+
+      '<div class="layers">'+layers.join(' • ')+'</div>'+
+      '<div class="small">'+(i===0?'Best modeled matchup for the current defense.':'Alternative composition.')+
+      ' Verify counts and buffs before using it.</div></div>';
+  }).join('');
+
+  $('defenseRead').textContent=defenseRead()+'. Report fingerprint '+fingerprint()+'.';
+  const sf=simFingerprint();
+  $('whyChanged').textContent=!state.previousSimulationFingerprint
+    ?'First simulation for this setup.'
+    :state.previousSimulationFingerprint===sf
+      ?'No input changes detected since the last simulation.'
+      :'Inputs changed since the previous simulation ('+state.previousSimulationFingerprint+' → '+sf+'). Results were recalculated.';
+  state.previousSimulationFingerprint=sf;save();
+});
+
+function snapshot(){
+  return{
+    defender:state.defender,reinforcement:state.reinforcement,
+    enemyBuff:state.enemyBuff,enemyDebuff:state.enemyDebuff,myBuff:state.myBuff,myDebuff:state.myDebuff,
+    controls:{
+      attackType:$('attackType').value,marchSize:$('marchSize').value,topTier:$('topTier').value,
+      rallyMembers:$('rallyMembers').value,mainGeneral:$('mainGeneral').value,assistantGeneral:$('assistantGeneral').value,
+      goal:$('goal').value,layerPreset:$('layerPreset').value
+    }
+  };
+}
+function save(){try{localStorage.setItem('evony-pvp-mobile-v1',JSON.stringify(snapshot()))}catch(e){}}
+function restore(s){
+  if(!s)return;
+  ['defender','reinforcement','enemyBuff','enemyDebuff','myBuff','myDebuff'].forEach(k=>{if(s[k])state[k]=s[k]});
+  if(s.controls)Object.entries(s.controls).forEach(([k,v])=>{if($(k))$(k).value=v});
+  rebuild();refreshFingerprint();
+}
+$('saveLocal').addEventListener('click',()=>{save();alert('Saved on this phone/browser.')});
+$('makeShare').addEventListener('click',()=>{
+  $('shareCode').value=btoa(unescape(encodeURIComponent(JSON.stringify(snapshot()))));
+});
+$('copyShare').addEventListener('click',async()=>{
+  if(!$('shareCode').value.trim())$('makeShare').click();
+  try{await navigator.clipboard.writeText($('shareCode').value.trim());alert('Share code copied.')}
+  catch(e){$('shareCode').select();document.execCommand('copy');alert('Share code copied.')}
+});
+$('loadShare').addEventListener('click',()=>{
+  try{
+    const obj=JSON.parse(decodeURIComponent(escape(atob($('shareCode').value.trim()))));
+    restore(obj);save();alert('Share code loaded.');
+  }catch(e){alert('That share code could not be read.')}
+});
+$('resetAll').addEventListener('click',()=>{
+  if(confirm('Reset all simulator data on this device?')){localStorage.removeItem('evony-pvp-mobile-v1');location.reload();}
+});
+
+['attackType','marchSize','topTier','rallyMembers','mainGeneral','assistantGeneral','goal','layerPreset']
+.forEach(id=>$(id).addEventListener('change',save));
+
+rebuild();refreshFingerprint();
+try{const saved=localStorage.getItem('evony-pvp-mobile-v1');if(saved)restore(JSON.parse(saved));}catch(e){}
+</script>
+</body>
+</html>
